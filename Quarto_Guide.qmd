@@ -1,0 +1,319 @@
+---
+title: "Quarto Guide"
+format:
+  pdf:
+    documentclass: scrartcl
+    pdf-engine: xelatex
+    code-block:
+      wrap: true
+    header-includes:
+      - \usepackage[dvipsnames]{xcolor}
+      - \usepackage{fontawesome5}
+      - \usepackage{graphicx} % for scalebox
+      - \usepackage{tcolorbox}
+      - \tcbuselibrary{skins, breakable, hooks}
+      - \usepackage{fontawesome5}
+      - \usepackage{wrapfig}
+      - \usepackage{lipsum} % just for filler text
+      - \usepackage{array}
+filters:
+  - critic-markup
+extensions:
+  - quarto-ext/fontawesome
+  - shafayetShafee/bsicons
+---
+
+# Quarto Overview
+
+Quarto is a multi-language successor to `R Markdown` from Posit, the company that distributes RStudio. Like `R Markdown`, Quarto allows one to create dynamic documents with code, text, and outputs (HTML, Word, PDF) from a single source file, but it supports multiple languages beyond R (including Python and Julia). It uses the `knitr` engine to execute R code, so most existing `.rmd` files can be rendered without modification.
+
+Quarto is separate, standalone software and not just an R package, which means R is not required for basic functionality. Unlike `R Markdown`, which depended on extra packages to extend its capabilities, Quarto integrates features such as figure cross-referencing, book creation, website/blog creation, and diagramming (Mermaid, Graphviz) directly.
+
+In contrast to `R Markdown`, which used R-specific chunk options (e.g., `echo = FALSE`, `warning = FALSE`), Quarto adopts a unified YAML syntax for configuration in both the document header and individual code blocks. This consistency applies across languages (R, Python, and Julia), though some options are format-specific. For example, certain settings affect HTML output, while others apply only to PDF.
+
+Beyond its built‑in features, Quarto supports **extensions** — modular add‑ons that contribute filters, themes, and tools for specialized tasks. Extensions make it easy to incorporate functionality such as icon sets, diagramming filters, or markup processors without writing custom code. They are installed at the project level, which keeps them version‑controlled alongside your source files and ensures that collaborators can render documents consistently. The guide to installation will overview how to install extensions after discussing how to install the Quarto software.
+
+## Installing Quarto
+
+1. Install Quarto
+  - Go to [Getting Started With Quarto](https://quarto.org/docs/get-started/ "Quarto Download").
+  - Download the installer for Windows.
+  - Open a terminal to verify installation:
+    - To launch the `Command Prompt`, type `cmd` in the Windows search field and press `enter`.
+    - To launch `PowerShell`, type `PowerShell` in the search field and press `enter`.
+    - In RStudio, click on the *Terminal* tab in the Console pane.
+    - In VS Code, select `View > Terminal` or use the keyboard shortcut ``Ctrl + ` ` `
+  - Confirm installation with:
+
+```{.Powershell}
+quarto --version
+```
+  
+2. Install RStudio and VS Code (if they are not already installed on your machine).
+3. Install the latest yearly release of TeX Live *or proceed to Step 4 if Tex Live is already installed*.
+  - Please note that TeX Live is updated yearly, which requires full installation as each new release drops. The reason for this annual release schedule is to create a reliable and stable baseline for users with package updates synchronized with the core software updates.
+  - Download [TeX Live](https://tug.org/texlive/ "TeX Live Download").
+  - During install, ensure `tlmgr` (TeX Live Manager) is included.
+  - Verify installation by running the following in a terminal:
+
+```{.Powershell}
+tlmgr --version
+```
+
+4. If Tex Live has already been installed on your machine, update it. Tex Live
+  - In a terminal, run the following to  update `tlmgr` and to update all LaTeX packages:
+  
+```{.Powershell}
+tlmgr update --self --all
+```
+
+5. Install Quarto Extensions
+  - Quarto Extensions are managed locally at the project level, so it will be necessary to add relevant extensions to each Quarto project folder rather than relying on a global installation. The reason for this is the need to ensure **reproducibility** and **portability** when projects are under version control. Bundling extensions with the project allows other users to confidently fork and clone projects without fear that they will not compile because the user lacks the specific version of the extension source code used as the project was developed (and maintained).
+  - Therefore, projects may already have an `_extensions` folder with the required files. In that case, it may not be necessary to install extensions.
+  - Adding new extensions to a project requires opening a terminal.
+  - Identify and copy the file path to your projects root folder, which is the main directory that contains all of your project's files and subfolders, including the `.qmd` file.
+  - In a terminal, type `cd` followed by the file path. For readability, the following is an example file path. You should replace it with the actual path on your system.
+
+```{.Powershell}
+cd C:\Users\bwing\OneDrive - ...\Documents\Repos - Quarto\Quarto Guide
+```
+  
+  - From the project's root directory, run:
+  
+```{.Powershell}
+quarto install repo-owner/repo-name
+```
+  
+  - This will automatically create an `_extensions` folder if one does not already exist. Extensions are installed into a `quarto-ext/` folder at the project root. Quarto creates this folder automatically if it doesn't exist. In certain cases, a repository's `README.md` will instruct you to use `add` instead of `install`. Both will work, but `install` is the current convention because it clearly indicates that the operation is installing an extension.
+
+::: {.callout-note}
+### Tip
+After installation, confirm that `quarto --version`, `R --version`, and `python --version` work in your terminal. If any command fails, it means the software is not registered on your PATH. Re‑run the installer or update your PATH environment variable so the executables are discoverable. Guidance on how to do this can be available.
+:::
+
+In the next section, we’ll look at look at examples of specific extensions that are potentially relevant for our reporting needs.
+
+---
+
+# Quarto Extensions
+
+## Critic Markup
+
+The Critic Markup offers specialized, Markdown-based syntax to denote edits and revisions when submitting report drafts for review by internal agency stakeholders. The syntax is quick and easy to add and remove from the document. This section shows the Critic Markup syntax verbatim, alongside rendered examples.
+
+::: {.callout-note}
+### Tip
+Although the Critic Markup extension installs into `quarto-ext/critic-markup/`, you must list `critic-markup` (*without `.lua`) under `filters:` and not under `extensions:` as one might expect. Quarto reads the extension's `_extension.yml` file and registers the `Lua` filter automatically, which rewrites the syntax into LaTeX macros (e.g., highlighting, colored text for additions and deletions). In HTML output, the Critic Markup extension uses CSS/JS for styling, so listing the extension as `mloubout/critic-markup` under `extensions:` would result in no styling being applied to the PDF.
+:::
+
+## Highlighting and Commenting
+
+It is quite simple to highlight a block of text by wrapping it as shown:
+
+`{==Highlighted text==}` {==Highlighted text==}
+
+Comments may also be added, either in conjuction with highlighting or without:
+
+`{== Highlighted text with a comment==}{>>First comment<<}` {== Highlighted text with a comment==}{>>First comment<<}
+
+`{>>Single comment <<}` {>>Single comment <<}
+
+## Showing the Diff: Addition, Deletion, and Replacement of Text
+
+Critic Markup allows for diff-style markup by enabling us to wrap text to signify additions and deletions from the document:
+
+`{++This is added text++}` {++This is added text++}
+
+`{++This is added text with some removed++}{-- removed--}` {++This is added text with some removed++}{-- removed--}
+
+`{--This is removed text--}` {--This is removed text--}
+
+`{--This is removed text with some added--}{++added ++}` {--This is removed text with some added--}{++added ++}
+
+`{~~This is original text~> this is the replacement~~}` {~~This is original text~> this is the replacement~~}
+
+---
+
+## Font Awesome
+
+Quarto may also be extended to include the ability to add scalable, vector-based icons to enhance the text. The vast majority of icon sets are designed for use exclusively by web developers using HTML, which means that the extensions require quite a bit of work to configure them for use with LaTeX. Fortunately, a Font Awesome extension is available to allow us to use the Font Awesome (FA) library of icons in PDF reports.
+
+::: {.callout-note}
+### Tip
+Currently, the Font Awesome extension is configured to work with Font Awesome 5 free icons only, Pandoc scans for both Font Awesome 5 and 6, resulting in failure to compile via LaTeX, since the extension currently uses Font Awesome 6 icons exclusively in HTML output. Issues in the repository indicate that the developers plan to add LaTeX support for Font Awesome 6 and 7 libraries. We can fork the repo to ensure that we are aware of updates as they are merged with the main branch. In the meantime, the `fontawesome.lua` has been modified to force it to work with FA5. When LaTeX support for FA6 is available, this will need to be updated.
+:::
+
+As this section will demonstrate, FA icons are easy to customize.
+
+### Basic Usage
+
+Without changing the font-size or color, FA icons will be solid and will compile in black and white:
+
+- \faBullhorn
+- \faCheckCircle
+- \faClipboard
+
+### Adding Color
+
+All FA icons may be filled with color:
+
+- \textcolor{Red}{\faChartLine} 14 program outcomes improved
+- \textcolor{Blue}{\faUsers} Community participation increased by 45%
+- \textcolor{ForestGreen}{\faLeaf} 3 sustainability initiatives expanded
+
+### Changing Size and Color of Inline Icons
+
+In addition to adding color, FA icons may also be customized to increase the size of the icons relative to the text:
+
+```{=latex}
+\begin{tabular}{ll}
+  \textbf{Color only} & \textcolor{Blue}{\faUsers} \\
+  \textbf{Size 2} & \textcolor{Blue}{\scalebox{2}{\faUsers}} \\
+  \textbf{Size 3} & \textcolor{Blue}{\scalebox{3}{\faUsers}} \\
+  \textbf{Size 4} & \textcolor{Blue}{\scalebox{4}{\faUsers}}
+\end{tabular}
+```
+
+### Callout Note Box With Inline Icon
+
+Markdown callout blocks are built into Quarto. These may be used to highlight information (notes, tips, warnings, examples). Notably, icons may be added to these blocks:
+
+::: {.callout-note}
+### Highlight
+\textcolor{Orange}{\faLightbulb} 25 grant applications were submitted
+:::
+
+### Callout-Style Note Box With Icon Aligned Left and Not Inline
+
+It is possible to manually construct note boxes that resemble callout blocks, with the advantage that these allow for fine-grained control over layout (icon alignment, spacing, colors):
+
+```{=latex}
+\begin{tcolorbox}[colback=gray!10,colframe=gray!50]
+  \begin{tabular}{@{}l p{0.8\textwidth}@{}}
+    \parbox[t]{0.1\textwidth}{\centering
+      \raisebox{-\height+\depth+0.25ex}{\scalebox{3}{\textcolor{Bittersweet}{\faBullhorn}}}
+    } &
+    \parbox[t]{\linewidth}{
+      2 new workflows were adopted\\
+      32 new staff were trained\\
+      450 assessments were completed
+    }
+  \end{tabular}
+\end{tcolorbox}
+```
+
+### Icon and Text Side by Side (No Wrapping)
+
+Icons and text may be typeset side by side without wrapping text around the icon even when a block of text is lengthy:
+
+```{=latex}
+\begin{minipage}[t]{0.15\textwidth}
+  \raisebox{\dimexpr-\height+\depth}{%
+    \scalebox{5}{\textcolor{TealBlue}{\faChartBar}}%
+  }
+\end{minipage}%
+\begin{minipage}[t]{0.8\textwidth}
+  \lipsum[1]
+\end{minipage}
+```
+
+### Icon and Text Side by Side (With Wrapping)
+
+It is also possible to wrap text around icons to mimic the newspaper style:
+
+```{=latex}
+\begin{wrapfigure}{l}{0.15\textwidth} % l = left side, width of box
+  \centering
+  \scalebox{5}{\textcolor{RoyalBlue}{\faAmbulance}}
+\end{wrapfigure}
+\lipsum[1]
+```
+
+### Facet Row (Icons Plus Caption)
+
+By combining a tabular environment with `\parbox` commands, which formats text in an invisible container in paragraph mode to enable text wrapping and justification, it is possible to create a row of "facets" with a big icon on top with a text caption underneath each one:
+
+```{=latex}
+\begin{center}
+\begin{tabular}{ccc}
+  \parbox[t]{0.25\textwidth}{\centering
+    \scalebox{4}{\textcolor{Cerulean}{\faChartArea}}\\[0.5ex]
+    5 metrics were approved and adopted
+  } &
+  \parbox[t]{0.25\textwidth}{\centering
+    \scalebox{4}{\textcolor{CornflowerBlue}{\faChurch}}\\[0.5ex]
+    5 new churches were onboarded
+  } &
+  \parbox[t]{0.25\textwidth}{\centering
+    \scalebox{4}{\textcolor{Mulberry}{\faChartPie}}\\[0.5ex]
+    0 exploding pie charts were used in reports (and never will be)
+  }
+\end{tabular}
+\end{center}
+```
+
+### Icons as Bullet Marker
+
+Last, it is possible to create lists with icons in place of bullets:
+
+```{=latex}
+\begin{itemize}
+  \item[\textcolor{JungleGreen}{\faDatabase}] FAMCare database went live
+  \item[\textcolor{Blue}{\faClinicMedical}] 1 new hospital partner was engaged
+  \item[\textcolor{Orchid}{\faBed}] 2 shelter beds were allocated
+\end{itemize}
+```
+
+---
+
+## Bootstrap Icons
+
+Bootstrap Icons (bsicons) are another free, open-source library of icons designed to be scalable and easy to style ... in HTML. Since these are saved as SVG icons, styling in LaTeX is much more challenging than with Font Awesome icons. It just isn't worth our time and effort to customize bsicons with different colors, so these icons will only render in black. However, they are easy to insert into Quarto documents and will compile to PDF now that I have customized the `Lua` script, so it may be worth perusing the library to see if there are icons that would be a good complement to the Font Awesome 5 library.
+
+### Basic Syntax
+
+I have modified the .Lua filter in this extension to make it easy for us to render bsicons to PDF with the following basic syntax:
+
+- Alarm {{< bi alarm-fill size=2 >}}
+- Archive Filled {{< bi archive-fill size=2 >}}
+- Award {{< bi award size=2 >}}
+- Bar Chart Steps {{< bi bar-chart-steps size=2 >}}
+- Bell Filled {{< bi bell-fill size=2 >}}
+- Book, Half Filled {{< bi book-half size=2 >}}
+- Bullseye {{< bi bullseye size=2 >}}
+- Card With Checklist {{< bi card-checklist size=2 >}}
+- Chat With Dots {{< bi chat-dots size=2 >}}
+- Heart With Pulse Filled {{< bi heart-pulse-fill size=2 >}}
+- House {{< bi house size=2 >}}
+- Key {{< bi key size=2 >}}
+- Lightning {{< bi lightning size=2 >}}
+- Octagon Filled {{< bi octagon-fill size=2 >}}
+- Person Badge Filled {{< bi person-badge-fill size=2 >}}
+- Rocket Taking Off {{< bi rocket-takeoff size=2 >}}
+- Sliders {{< bi sliders size=2 >}}
+- Trophy Filled {{< bi trophy-fill size=2 >}}
+- Trashcan {{< bi trash size=2 >}}
+- X-Diamond Filled {{< bi x-diamond-fill size=2 >}}
+
+### Resizing the Icons
+
+These icons may be resized, as illustrated by the following renderings of a Bar Chart With X-Axis Line:
+
+- Size 1 {{< bi bar-chart-line size=1 >}}
+- Size 2 {{< bi bar-chart-line size=2 >}}
+- Size 3 {{< bi bar-chart-line size=3 >}}
+- Size 4 {{< bi bar-chart-line size=4 >}}
+
+### Multiple Icon Versions
+
+A number of icons come in multiple versions as this non-exhaustive list of house icons illustrates:
+
+- House {{< bi house size=2 >}}
+- House With Addition Sign {{< bi house-add size=2 >}}
+- House Filled With Addition Sign {{< bi house-add-fill size=2 >}}
+- House With Check {{< bi house-check size=2 >}}
+- House Filled With Check {{< bi house-check-fill size=2 >}}
+- House With Door {{< bi house-door size=2 >}}
+- House Filled With Door {{< bi house-door-fill size=2 >}}
+- House With Heart {{< bi house-heart size=2 >}}
+- Houses {{< bi houses size=2 >}}
